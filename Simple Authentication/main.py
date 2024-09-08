@@ -19,7 +19,6 @@ def get_db():
 # Password hashing setup
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Pydantic model for user registration
 
 @app.post("/register/")
 def register(user: UserCreate, db: Session = Depends(get_db)):
@@ -27,7 +26,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     new_user = User(
         username=user.username,
         email=user.email,
-        hashed_password=hashed_password,
+        password=hashed_password,
         first_name=user.first_name,
         last_name=user.last_name,
     )
@@ -53,16 +52,14 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         )
         .first()
     )
-    if not db_user or not pwd_context.verify(user.password, db_user.hashed_password):
+    if not db_user or not pwd_context.verify(user.password, db_user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid username or password",
         )
-    # In a real application, this is where you would create a session or return a token
     return {"message": "Login successful!"}
 
 @app.post("/logout/")
 def logout():
-    # In a real application, this is where you would destroy the session
     return {"message": "Logout successful!"}
 

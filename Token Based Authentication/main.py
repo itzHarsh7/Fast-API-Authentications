@@ -40,7 +40,7 @@ def get_current_user(token: str, db: Session = Depends(get_db)):
 @app.post("/register/")
 def register(user: UserCreate, db: Session = Depends(get_db)):
     hashed_password = get_password_hash(user.password1)
-    new_user = User(username=user.username, email=user.email, hashed_password=hashed_password)
+    new_user = User(username=user.username, email=user.email, password=hashed_password,first_name=user.first_name,last_name=user.last_name)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
@@ -49,7 +49,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 @app.post("/login/", response_model=TokenResponse)
 def login(user: UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(User).filter((User.username == user.username_or_email) | (User.email == user.username_or_email)).first()
-    if not db_user or not verify_password(user.password, db_user.hashed_password):
+    if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     
     # Create token if first time user login and retrieve token if user already exists
@@ -60,7 +60,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(token)
     
-    return {"token": token.token}
+    return {"token": token.token,"message":"User Logged in Successfully!"}
 
 @app.get("/protected-route/")
 def protected_route(current_user: User = Depends(get_current_user)):

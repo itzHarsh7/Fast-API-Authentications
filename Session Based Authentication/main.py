@@ -63,7 +63,7 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
     new_user = User(
         username=user.username,
         email=user.email,
-        hashed_password=hashed_password,
+        password=hashed_password,
         first_name=user.first_name,
         last_name=user.last_name,
     )
@@ -71,7 +71,11 @@ async def register(user: UserCreate, db: Session = Depends(get_db)):
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
-        return {"message": "User registered successfully!"}
+        # Return the created user's information as a UserResponse model
+        return UserResponse(
+            username=new_user.username,
+            email=new_user.email
+        )
     except IntegrityError:
         db.rollback()
         raise HTTPException(
@@ -89,7 +93,7 @@ async def login(response: Response, user: UserLogin, db: Session = Depends(get_d
         )
         .first()
     )
-    if not db_user or not verify_password(user.password, db_user.hashed_password):
+    if not db_user or not verify_password(user.password, db_user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     
     session_id = create_session(db, db_user.id)

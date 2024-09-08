@@ -31,7 +31,6 @@ class UserLogin(BaseModel):
     password: str
 
 class UserResponse(BaseModel):
-    id: int
     username: str
     email: str
     first_name: str = None
