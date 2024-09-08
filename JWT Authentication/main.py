@@ -98,7 +98,7 @@ def login_for_access_token(
 
 @app.get("/users/me/", response_model=UserResponse)
 def read_users_me(request:Request, db: Session = Depends(get_db)):
-    payload = decode_token(request.cookies.get(ACCESS_COOKIE_NAME)
+    payload = decode_token(request.cookies.get(ACCESS_COOKIE_NAME))
     if payload is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
     
